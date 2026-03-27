@@ -181,9 +181,11 @@
 # SECTION 8 : Installer les dépendances npm
 # ============================================================================
 - name: Install npm dependencies
-  community.general.npm:
-    path: "{{ quiz_app_home }}"
+  ansible.builtin.command:
+    cmd: npm install
+    chdir: "{{ quiz_app_home }}"
   register: npm_install
+  changed_when: npm_install.rc == 0 and 'added' in npm_install.stdout
   tags:
     - npm_dependencies
 
@@ -226,12 +228,11 @@
 # SECTION 10 : Installer serve globalement
 # ============================================================================
 - name: Install serve package globally
-  community.general.npm:
-    name: serve
-    global: "{{ quiz_serve_global }}"
+  ansible.builtin.command:
+    cmd: npm install -g serve
   when: quiz_install_serve
   register: serve_install
-  changed_when: serve_install.changed
+  changed_when: serve_install.rc == 0 and ('added' in serve_install.stdout or 'up to date' in serve_install.stdout)
   tags:
     - serve_install
 

@@ -1,6 +1,6 @@
 ---
 galaxy_info:
-  namespace: josephDelnordd
+  namespace: josephdelnordd
   author: "Joseph DELNORD"
   description: "Role for deploying Node.js quiz-ansible application"
   company: "ftutorials"
