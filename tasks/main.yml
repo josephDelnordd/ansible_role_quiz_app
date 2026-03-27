@@ -24,7 +24,7 @@
 # ============================================================================
 - name: Update package index (Debian/Ubuntu)
   ansible.builtin.apt:
-    update_cache: yes
+    update_cache: true
     cache_valid_time: 3600
   when:
     - is_debian
@@ -35,7 +35,7 @@
 - name: Update packages (RedHat/Rocky)
   ansible.builtin.dnf:
     name: "*"
-    state: latest
+    state: present
   when:
     - is_redhat
     - quiz_system_update
@@ -80,9 +80,21 @@
   tags:
     - nodejs
 
-- name: Setup Node.js repository (Debian/Ubuntu)
-  ansible.builtin.shell:
-    cmd: "curl -fsSL https://deb.nodesource.com/setup_{{ quiz_nodejs_version }}.x | sudo -E bash -"
+- name: Download Node.js setup script (Debian/Ubuntu)
+  ansible.builtin.get_url:
+    url: "https://deb.nodesource.com/setup_{{ quiz_nodejs_version }}.x"
+    dest: /tmp/nodesource_setup_deb.sh
+    mode: "0755"
+  when: is_debian
+  tags:
+    - nodejs
+
+- name: Execute Node.js setup script (Debian/Ubuntu)
+  ansible.builtin.shell: |
+    set -o pipefail
+    bash /tmp/nodesource_setup_deb.sh
+  args:
+    executable: /bin/bash
   when: is_debian
   changed_when: false
   tags:
@@ -103,7 +115,7 @@
   ansible.builtin.apt:
     name: nodejs
     state: present
-    update_cache: yes
+    update_cache: true
   when: is_debian
   tags:
     - nodejs
@@ -149,7 +161,7 @@
     repo: "{{ quiz_app_repo }}"
     dest: "{{ quiz_app_home }}"
     version: "{{ quiz_app_version }}"
-    force: yes
+    force: true
   register: git_clone
   tags:
     - git_clone
@@ -169,7 +181,7 @@
 # SECTION 8 : Installer les dépendances npm
 # ============================================================================
 - name: Install npm dependencies
-  ansible.builtin.npm:
+  community.general.npm:
     path: "{{ quiz_app_home }}"
   register: npm_install
   tags:
@@ -178,7 +190,6 @@
 - name: Display npm install result
   ansible.builtin.debug:
     msg: "✅ Dépendances npm installées avec succès"
-  when: npm_install.changed
   tags:
     - npm_dependencies
 
@@ -190,6 +201,7 @@
     cmd: npm run build
     chdir: "{{ quiz_app_home }}"
   register: build_result
+  changed_when: build_result.rc == 0
   tags:
     - app_build
 
@@ -214,11 +226,12 @@
 # SECTION 10 : Installer serve globalement
 # ============================================================================
 - name: Install serve package globally
-  ansible.builtin.npm:
+  community.general.npm:
     name: serve
     global: "{{ quiz_serve_global }}"
   when: quiz_install_serve
   register: serve_install
+  changed_when: serve_install.changed
   tags:
     - serve_install
 
@@ -264,6 +277,7 @@
   async: "{{ quiz_serve_async_timeout }}"
   poll: 0
   register: serve_async_job
+  changed_when: true
   tags:
     - service_management
 
@@ -356,4 +370,4 @@
       ╚════════════════════════════════════════════════════════════════╝
 
   tags:
-    - summary # Tag pour le résumé final du déploiement
+    - summary

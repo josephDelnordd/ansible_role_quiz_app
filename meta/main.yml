@@ -1,8 +1,8 @@
 ---
 galaxy_info:
-  namespace: ftutorials
-  author: "Joseph DELNORD joseph.delnord@outlook.com"
-  description: "Complete role for deploying Node.js quiz-ansible application on Debian/Ubuntu and RedHat/Rocky Linux"
+  namespace: josephdelnordd
+  author: "Joseph DELNORD"
+  description: "Role for deploying Node.js quiz-ansible application"
   company: "ftutorials"
   license: MIT
   min_ansible_version: "2.9"
@@ -10,8 +10,6 @@ galaxy_info:
   galaxy_tags:
     - nodejs
     - deployment
-    - web-application
-    - docker
     - quiz
     - git
     - npm
@@ -19,13 +17,10 @@ galaxy_info:
   platforms:
     - name: Ubuntu
       versions:
-        - "18.04"
-        - "20.04"
-        - "22.04"
+        - all
     - name: Debian
       versions:
-        - "10"
-        - "11"
+        - all
     - name: EL
       versions:
         - "8"
